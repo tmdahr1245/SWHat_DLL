@@ -1,6 +1,7 @@
 
 #include "WinAPI.hpp"
 #include "NtAPI.hpp"
+#include "Util.hpp"
 #pragma warning(disable: 4996)
 
 #define PE_SIGNATURE 0x3C
@@ -50,14 +51,6 @@ char NTapi_list[NTAPI_NUM][50] = {
 WinAPI_struct* winapi;
 NTAPI_struct* ntapi;
 
-wchar_t* ConvertMultibyteToUnicode(char* str) {
-	wchar_t* pStr;
-	int strSize = MultiByteToWideChar(CP_ACP, 0, str, -1, NULL, NULL);
-
-	pStr = (wchar_t*)malloc(sizeof(wchar_t) * strSize);
-	MultiByteToWideChar(CP_ACP, 0, str, strlen(str) + 1, pStr, strSize);
-	return pStr;
-}
 VOID Init() {
 	winapi = (WinAPI_struct*)malloc(sizeof(WinAPI_struct));
 	if (!winapi) {

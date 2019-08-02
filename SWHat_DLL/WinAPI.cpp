@@ -1,8 +1,10 @@
 #include "WinAPI.hpp"
 #include "Log.hpp"
+#include "Util.hpp"
 #include <stdio.h>
 #include <tchar.h>
 #pragma warning(disable: 4996)
+#pragma comment(lib, "ws2_32.lib")
 
 FARPROC OrgWinAPI[WINAPI_NUM]= { NULL, };
 
@@ -20,30 +22,7 @@ typedef int (WSAAPI* PFMyWSARecvFrom)(SOCKET s, LPWSABUF lpBuffers, DWORD dwBuff
 typedef int (WSAAPI* PFMyWSASend)(SOCKET s, LPWSABUF lpBuffers, DWORD dwBufferCount, LPDWORD lpNumberOfBytesSent, DWORD dwFlags, LPWSAOVERLAPPED lpOverlapped, LPWSAOVERLAPPED_COMPLETION_ROUTINE lpCompletionRoutine);
 typedef int (WSAAPI* PFMyWSASendTo)(SOCKET s, LPWSABUF lpBuffers, DWORD dwBufferCount, LPDWORD lpNumberOfBytesSent, DWORD dwFlags, const struct sockaddr* lpTo, int iToLen, LPWSAOVERLAPPED lpOverlapped, LPWSAOVERLAPPED_COMPLETION_ROUTINE lpCompletionRoutine);
 typedef BOOL(WINAPI* PFMyCloseHandle)(HANDLE hObject);
-int get_ip(const char* src){
-	int s1 = src[2] & 0xFF;
-	int s2 = src[3] & 0xFF;
-	int s3 = src[4] & 0xFF;
-	int s4 = src[5] & 0xFF;
 
-	return ((s1 << 24) + (s2 << 16) + (s3 << 8) + (s4 << 0));
-}
-int get_port(const char* src) {
-	int s1 = src[0] & 0xFF;
-	int s2 = src[1] & 0xFF;
-
-	return ((s1 << 8) + (s2 << 0));
-}
-wchar_t* ip_int_to_string(unsigned int ip){
-	unsigned char bytes[4];
-	wchar_t ret[15];
-	bytes[0] = ip & 0xFF;
-	bytes[1] = (ip >> 8) & 0xFF;
-	bytes[2] = (ip >> 16) & 0xFF;
-	bytes[3] = (ip >> 24) & 0xFF;
-	_stprintf(ret,L"%d.%d.%d.%d", bytes[3], bytes[2], bytes[1], bytes[0]);
-	return ret;
-}
 int WSAAPI Myconnect(
 	SOCKET s, 
 	const sockaddr* name,//SOCKADDR_IN
@@ -54,14 +33,29 @@ int WSAAPI Myconnect(
 	//SOCKET_ERROR가 리턴값으로 나오면 '연결 시도했지만 실패라는것' 까지 로깅 해줘도 좋을듯
 	ret = ((PFMyconnect)OrgWinAPI[0])(s, name, namelen);
 	wchar_t buf[100];
+	SOCKADDR_IN* sock = (SOCKADDR_IN*)name;
 
-	_stprintf(buf, L"connect, socket : %x, port : %d, ip : %s", s, get_port(name->sa_data), ip_int_to_string(get_ip(name->sa_data)));
+	_stprintf(buf, L"connect, socket : %x, port : %d, ip : %s", s, ntohs(sock->sin_port), ConvertMultibyteToUnicode(inet_ntoa(sock->sin_addr)));
 	if (ret == SOCKET_ERROR)
 		lstrcat(buf, L" try to connect but failed");
 	else
 		lstrcat(buf, L" connect success");
 	OutputDebugStringW(buf);
-	Log2(buf);
+
+	vector<pair<string, pair<string, string>>> v;
+	v.emplace_back(make_pair("string", make_pair("api", "connect")));
+	char tt[100];
+	sprintf(tt, "0x%x", s);
+	v.emplace_back(make_pair("int", make_pair("socket", tt)));
+	sprintf(tt, "%d", ntohs(sock->sin_port));
+	v.emplace_back(make_pair("int", make_pair("port", tt)));
+	v.emplace_back(make_pair("int", make_pair("ip", inet_ntoa(sock->sin_addr))));
+	if (ret == SOCKET_ERROR)
+		v.emplace_back(make_pair("string", make_pair("Status", "fail")));
+	else
+		v.emplace_back(make_pair("string", make_pair("Status", "success")));
+	Log(v);
+	//Log2(buf);
 	return ret;
 }
 int WSAAPI Mysend(
@@ -73,9 +67,17 @@ int WSAAPI Mysend(
 	int ret;
 	wchar_t b[1000];
 	_stprintf(b, L"send, socket : %x", s);
-	Log2(b);
+	//Log2(b);
 	OutputDebugString(TEXT("send"));
 	ret = ((PFMysend)OrgWinAPI[1])(s, buf, len, flags);
+	vector<pair<string, pair<string, string>>> v;
+	v.emplace_back(make_pair("string", make_pair("api", "send")));
+	char tt[100];
+	sprintf(tt, "0x%x", s);
+	v.emplace_back(make_pair("int", make_pair("socket", tt)));
+	sprintf(tt, "0x%x", ret);
+	v.emplace_back(make_pair("int", make_pair("ret", tt)));
+	LogWithBuffer(v, (wchar_t*)buf, len, "buf");
 	return ret;
 }
 int WSAAPI Mysendto(
@@ -218,8 +220,16 @@ BOOL WINAPI MyCloseHandle(HANDLE hObject) {
 	wchar_t buf[100];
 	_stprintf(buf, L"MyCloseHandle, handle : %x, ", hObject);
 	OutputDebugString(buf);
-	Log2(buf);
+	//Log2(buf);
 	ret = ((PFMyCloseHandle)OrgWinAPI[12])(hObject);
+	vector<pair<string, pair<string, string>>> v;
+	v.emplace_back(make_pair("string", make_pair("api", "CloseHandle")));
+	char tt[100];
+	sprintf(tt, "0x%x", hObject);
+	v.emplace_back(make_pair("int", make_pair("HANDLE", tt)));
+	sprintf(tt, "0x%x", ret);
+	v.emplace_back(make_pair("int", make_pair("ret", tt)));
+	Log(v);
 	return ret;
 }
 LPVOID MyFunc[WINAPI_NUM] = {

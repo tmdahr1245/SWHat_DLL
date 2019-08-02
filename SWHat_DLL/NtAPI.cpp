@@ -1,7 +1,10 @@
 #include "NtAPI.hpp"
 #include "Log.hpp"
+#include "Util.hpp"
 #include <tchar.h>
 #include <stdio.h>
+#include <iostream>
+#include <vector>
 using namespace std;
 
 #define BUFSIZE 1000
@@ -74,7 +77,6 @@ BOOL ExceptNtCreateFile(LPWSTR fileName) {
 	}
 	return ret;
 }
-HANDLE hLogFile = NULL;
 NTSTATUS NTAPI MyNtCreateFile(
 	PHANDLE FileHandle, 
 	ACCESS_MASK DesiredAccess, //0x40000000L -> 쓰기권한
@@ -88,20 +90,23 @@ NTSTATUS NTAPI MyNtCreateFile(
 	PVOID EaBuffer OPTIONAL, 
 	ULONG EaLength
 ) {
+	
 	NTSTATUS ret = ((PFMyNtCreateFile)OrgNTAPI[0])(FileHandle, DesiredAccess, ObjectAttributes, IoStatusBlock, AllocationSize, FileAttributes, ShareAccess, CreateDisposition, CreateOptions, EaBuffer, EaLength);
 	//if (lstrcmp(ObjectAttributes->ObjectName->Buffer, L"test.json")!=0) {
 	//	return ret;
 	//}
+	if (hLogFile == *FileHandle)
+		return ret;
 
-
-	if ((ObjectAttributes->ObjectName->Buffer[0] == 't' &&
-		ObjectAttributes->ObjectName->Buffer[1] == 'e' &&
-		ObjectAttributes->ObjectName->Buffer[2] == 's' &&
-		ObjectAttributes->ObjectName->Buffer[3] == 't')){
+	//if ((ObjectAttributes->ObjectName->Buffer[0] == 't' &&
+	//	ObjectAttributes->ObjectName->Buffer[1] == 'e' &&
+	//	ObjectAttributes->ObjectName->Buffer[2] == 's' &&
+	//	ObjectAttributes->ObjectName->Buffer[3] == 't')){
+	/*if(check(ObjectAttributes->ObjectName->Buffer)){
 		if(!hLogFile)
 			hLogFile = *FileHandle;
 		return ret;
-	}
+	}*/
 	
 	if (ExceptNtCreateFile(ObjectAttributes->ObjectName->Buffer)) {
 		//GetCurrentDirectoryA(1000, dir);
@@ -172,9 +177,20 @@ NTSTATUS NTAPI MyNtCreateFile(
 		lstrcat(buf, tmp);
 
 		OutputDebugString(buf);
+		vector<pair<string, pair<string, string>>> v;
+		v.emplace_back(make_pair("string", make_pair("api", "NtCreateFile")));
+		v.emplace_back(make_pair("string", make_pair("FileName", string(ConvertUnicodeToMultibyte(str->Buffer)))));
+		char tt[100];
+		sprintf(tt, "0x%x", ret);
+		v.emplace_back(make_pair("int", make_pair("ret", tt)));
+		sprintf(tt, "0x%x", *FileHandle);
+		v.emplace_back(make_pair("int", make_pair("FileHandle", tt)));
+		sprintf(tt, "0x%x", DesiredAccess);
+		v.emplace_back(make_pair("int", make_pair("AcessMask", tt)));
+
 
 		//Log();
-		Log2(buf);
+		Log(v);
 
 	}
 	return ret;
@@ -204,7 +220,17 @@ NTSTATUS NTAPI MyNtWriteFile(
 	//Log();
 	wchar_t t[1000];
 	_stprintf(t, L"NtWriteFile, FileHandle : %x", FileHandle);
-	Log2(t);
+	//Log2(t);
+	vector<pair<string, pair<string, string>>> v;
+	v.emplace_back(make_pair("string", make_pair("api", "NtWriteFile")));
+	char tt[100];
+	sprintf(tt, "0x%x", FileHandle);
+	v.emplace_back(make_pair("int", make_pair("FileHandle", tt)));
+	sprintf(tt, "0x%x", ret);
+	v.emplace_back(make_pair("int", make_pair("ret", tt)));
+
+	//Log2(v);
+	LogWithBuffer(v, (wchar_t*)Buffer, Length, "Buffer");
 	return ret;
 }
 NTSTATUS NTAPI MyNtDeleteKey(//ntopenkey로 handle가져오는데 ntopenkey로그에서 레지스트리명 얻으면 될듯
@@ -215,8 +241,16 @@ NTSTATUS NTAPI MyNtDeleteKey(//ntopenkey로 handle가져오는데 ntopenkey로그에서 레
 	_stprintf(buf, L"MyNtDeleteKey, FileHandle : %x, ", KeyHandle);
 	//strcat(buf, (LPCSTR)Buffer);
 	OutputDebugString(buf);
-	Log2(buf);
+	//Log2(buf);
 	//OutputDebugString(TEXT("NtDeleteKey"));
+	vector<pair<string, pair<string, string>>> v;
+	v.emplace_back(make_pair("string", make_pair("api", "NtDeleteKey")));
+	char tt[100];
+	sprintf(tt, "0x%x", KeyHandle);
+	v.emplace_back(make_pair("int", make_pair("KeyHandle", tt)));
+
+	//Log();
+	Log(v);
 	return ret;
 }
 NTSTATUS NTAPI MyNtDeleteValueKey(//ntcreatekey로 handle 가져오는데 ntcreatekey 로그에서 레지스트리명 얻으면 될듯
@@ -228,8 +262,19 @@ NTSTATUS NTAPI MyNtDeleteValueKey(//ntcreatekey로 handle 가져오는데 ntcreatekey 
 	_stprintf(buf, L"MyNtDeleteValueKey, FileHandle : %x, ", KeyHandle);
 	//strcat(buf, (LPCSTR)Buffer);
 	OutputDebugStringW(buf);
-	Log2(buf);
+	//Log2(buf);
 	//OutputDebugString(TEXT("NtDeleteValueKey"));
+	vector<pair<string, pair<string, string>>> v;
+	v.emplace_back(make_pair("string", make_pair("api", "NtDeleteValueKey")));
+	char tt[100];
+	sprintf(tt, "0x%x", KeyHandle);
+	v.emplace_back(make_pair("int", make_pair("KeyHandle", tt)));
+	v.emplace_back(make_pair("string", make_pair("ValueName", string(ConvertUnicodeToMultibyte(ValueName->Buffer)))));
+	sprintf(tt, "0x%x", ret);
+	v.emplace_back(make_pair("int", make_pair("ret", tt)));
+
+	//Log();
+	Log(v);
 	return ret;
 }
 NTSTATUS NTAPI MyNtCreateKey(
@@ -246,8 +291,20 @@ NTSTATUS NTAPI MyNtCreateKey(
 	_stprintf(buf, L"MyNtCreateKey, FileHandle : %x, Obj : %s", *KeyHandle, ObjectAttributes->ObjectName->Buffer);
 	//strcat(buf, (LPCSTR)Buffer);
 	OutputDebugStringW(buf);
-	Log2(buf);
+	//Log2(buf);
 	//OutputDebugString(TEXT("NtCreateKey"));
+	vector<pair<string, pair<string, string>>> v;
+	v.emplace_back(make_pair("string", make_pair("api", "NtCreateKey")));
+	char tt[100];
+	sprintf(tt, "0x%x", *KeyHandle);
+	v.emplace_back(make_pair("int", make_pair("KeyHandle", tt)));
+	//v.emplace_back(make_pair("string", make_pair("Class", string(ConvertUnicodeToMultibyte(Class->Buffer)))));//주석풀면 파일 저장할때 크래시 나던데..
+	v.emplace_back(make_pair("string", make_pair("Name", string(ConvertUnicodeToMultibyte(ObjectAttributes->ObjectName->Buffer)))));
+	sprintf(tt, "0x%x", ret);
+	v.emplace_back(make_pair("int", make_pair("ret", tt)));
+
+	//Log();
+	Log(v);
 	return ret;
 }
 NTSTATUS NTAPI MyNtOpenKey(
@@ -261,7 +318,16 @@ NTSTATUS NTAPI MyNtOpenKey(
 	//strcat(buf, (LPCSTR)Buffer);
 	OutputDebugStringW(buf);
 	//OutputDebugString(TEXT("NtOpenKey"));
-	Log2(buf);
+	//Log2(buf);
+	vector<pair<string, pair<string, string>>> v;
+	v.emplace_back(make_pair("string", make_pair("api", "NtOpenKey")));
+	char tt[100];
+	sprintf(tt, "0x%x", *KeyHandle);
+	v.emplace_back(make_pair("int", make_pair("KeyHandle", tt)));
+	v.emplace_back(make_pair("string", make_pair("Name", string(ConvertUnicodeToMultibyte(ObjectAttributes->ObjectName->Buffer)))));
+	sprintf(tt, "0x%x", ret);
+	v.emplace_back(make_pair("int", make_pair("ret", tt)));
+	Log(v);
 	return ret;
 }
 NTSTATUS NTAPI MyNtSetValueKey(
@@ -277,9 +343,37 @@ NTSTATUS NTAPI MyNtSetValueKey(
 	_stprintf(buf, L"MyNtSetValueKey, FileHandle : %x, Value : %s", KeyHandle, ValueName->Buffer);
 	//strcat(buf, (LPCSTR)Buffer);
 	OutputDebugStringW(buf);
-	Log2(buf);
+	//Log2(buf);
 	//OutputDebugString(TEXT("NtSetValueKey"));
+	vector<pair<string, pair<string, string>>> v;
+	v.emplace_back(make_pair("string", make_pair("api", "NtSetValueKey")));
+	char tt[100];
+	sprintf(tt, "0x%x", KeyHandle);
+	v.emplace_back(make_pair("int", make_pair("KeyHandle", tt)));
+	v.emplace_back(make_pair("string", make_pair("Value", string(ConvertUnicodeToMultibyte(ValueName->Buffer)))));
+	sprintf(tt, "0x%x", ret);
+	v.emplace_back(make_pair("int", make_pair("ret", tt)));
+	LogWithBuffer(v, (wchar_t*)Data, DataSize, "Data");
 	return ret;
+}
+BOOL InjectDll(LPCTSTR szDllPath, DWORD dwPID) {
+	HANDLE hProcess = NULL, hThread = NULL;
+	HMODULE hModule = NULL;
+	LPVOID pRemoteBuf = NULL;
+	DWORD dwBufSize = (DWORD)(_tcslen(szDllPath) + 1) * sizeof(TCHAR);
+	LPTHREAD_START_ROUTINE pThreadproc;
+	if (!(hProcess = OpenProcess(PROCESS_ALL_ACCESS, FALSE, dwPID))) {
+		return FALSE;
+	}
+	pRemoteBuf = VirtualAllocEx(hProcess, NULL, dwBufSize, MEM_COMMIT, PAGE_READWRITE);
+	WriteProcessMemory(hProcess, pRemoteBuf, (LPVOID)szDllPath, dwBufSize, NULL);
+	hModule = GetModuleHandle(TEXT("kernel32.dll"));
+	pThreadproc = (LPTHREAD_START_ROUTINE)GetProcAddress(hModule, "LoadLibraryW");
+	hThread = CreateRemoteThread(hProcess, NULL, 0, pThreadproc, pRemoteBuf, 0, NULL);
+	WaitForSingleObject(hThread, INFINITE);
+	CloseHandle(hThread);
+	CloseHandle(hProcess);
+	return TRUE;
 }
 NTSTATUS NTAPI MyNtCreateUserProcess(
 	PHANDLE ProcessHandle, 
@@ -294,20 +388,34 @@ NTSTATUS NTAPI MyNtCreateUserProcess(
 	PPS_CREATE_INFO CreateInfo, 
 	PPS_ATTRIBUTE_LIST AttributeList
 ) {
-	NTSTATUS ret = ((PFMyNtCreateUserProcess)OrgNTAPI[7])(ProcessHandle, ThreadHandle, ProcessDesiredAccess, ThreadDesiredAccess, ProcessObjectAttributes, ThreadObjectAttributes, ProcessFlags, ThreadFlags, ProcessParameters, CreateInfo, AttributeList);
+	NTSTATUS ret = ((PFMyNtCreateUserProcess)OrgNTAPI[7])(ProcessHandle, ThreadHandle, ProcessDesiredAccess, ThreadDesiredAccess, ProcessObjectAttributes, ThreadObjectAttributes, ProcessFlags, 1/*ThreadFlags*/, ProcessParameters, CreateInfo, AttributeList);
 	wchar_t buf[1000]; 
 	wchar_t tmp[100];
-	
 	_stprintf(buf, TEXT("NtCreateUserProcess(pid : %d, "), GetProcessId(*ProcessHandle));
 	lstrcat(buf, ProcessParameters->ImagePathName.Buffer);
 	lstrcat(buf, TEXT(", cmdline : "));
 	lstrcat(buf, ProcessParameters->CommandLine.Buffer);
 	
 	OutputDebugString(buf);
-	Log2(buf);
+	//Log2(buf);
+	InjectDll(TEXT("C:\\Users\\tmdahr1245\\source\\repos\\SWHat_DLL\\Release\\SWHat_DLL.dll"), GetProcessId(*ProcessHandle));
+	if (!ThreadFlags)ResumeThread(ThreadHandle);
+	vector<pair<string, pair<string, string>>> v;
+	v.emplace_back(make_pair("string", make_pair("api", "NtCreateUserProcess")));
+	char tt[100];
+	sprintf(tt, "0x%x", *ProcessHandle);
+	v.emplace_back(make_pair("int", make_pair("ProcessHandle", tt)));
+	sprintf(tt, "%d", GetProcessId(*ProcessHandle));
+	v.emplace_back(make_pair("int", make_pair("pid", tt)));
+	v.emplace_back(make_pair("string", make_pair("ImagePathName", string(ConvertUnicodeToMultibyte(ProcessParameters->ImagePathName.Buffer)))));
+	v.emplace_back(make_pair("string", make_pair("cmdline", string(ConvertUnicodeToMultibyte(ProcessParameters->CommandLine.Buffer)))));
+	sprintf(tt, "0x%x", ret);
+	v.emplace_back(make_pair("int", make_pair("ret", tt)));
+	Log(v);
+
 	return ret;
 }
-NTSTATUS NTAPI MyNtWriteVirtualMemory(
+NTSTATUS NTAPI MyNtWriteVirtualMemory(//createuserprocess안 injectdll에서 호출되는 writeprocessmemory일경우 예외처리 해줘야함
 	HANDLE ProcessHandle,
 	LPVOID BaseAddress,
 	LPCVOID Buffer,
@@ -319,8 +427,20 @@ NTSTATUS NTAPI MyNtWriteVirtualMemory(
 	_stprintf(buf, L"NtWriteVirtualMemory, pid : %d, ", GetProcessId(ProcessHandle));
 	lstrcat(buf, L"");
 	OutputDebugString(buf);
-	Log2(buf);
+	//Log2(buf);
 	//OutputDebugString(TEXT("NtWriteVirtualMemory"));
+	vector<pair<string, pair<string, string>>> v;
+	v.emplace_back(make_pair("string", make_pair("api", "NtWriteVirtualMemory")));
+	char tt[100];
+	sprintf(tt, "0x%x", ProcessHandle);
+	v.emplace_back(make_pair("int", make_pair("ProcessHandle", tt)));
+	sprintf(tt, "%d", GetProcessId(ProcessHandle));
+	v.emplace_back(make_pair("int", make_pair("pid", tt)));
+	sprintf(tt, "0x%x", BaseAddress);
+	v.emplace_back(make_pair("int", make_pair("BaseAddress", tt)));
+	sprintf(tt, "0x%x", ret);
+	v.emplace_back(make_pair("int", make_pair("ret", tt)));
+	LogWithBuffer(v, (wchar_t*)Buffer, NumberOfBytesToWrite, "Buffer");
 	return ret;
 }
 
@@ -330,9 +450,17 @@ NTSTATUS NTAPI MyNtClose(
 	wchar_t log[1000];
 	DWORD dwBytes = 0;
 	_stprintf(log, L"NtClose handle : %x", Handle);
-	Log2(log);
+	//Log2(log);
 	//WriteFile(hLogFile, log, strlen(log), &dwBytes, NULL);
 	NTSTATUS ret = ((PFMyNtClose)OrgNTAPI[9])(Handle);
+	vector<pair<string, pair<string, string>>> v;
+	v.emplace_back(make_pair("string", make_pair("api", "NtClose")));
+	char tt[100];
+	sprintf(tt, "0x%x", Handle);
+	v.emplace_back(make_pair("int", make_pair("Handle", tt)));
+	sprintf(tt, "0x%x", ret);
+	v.emplace_back(make_pair("int", make_pair("ret", tt)));
+	Log(v);
 	return ret;
 }
 LPVOID MyNtFunc[NTAPI_NUM] = { 
