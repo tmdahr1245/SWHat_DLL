@@ -1,4 +1,5 @@
 #include "Util.hpp"
+#include <stdio.h>
 HANDLE hEvent, hThread;
 DWORD dwThreadID;
 void WaitThreadStart() {
@@ -42,7 +43,7 @@ char* GetProcessName(DWORD pid) {
 			}
 			bProcessFound = Process32Next(hSnapshot, &ProcessEntry32);
 		}
+		CloseHandle(hSnapshot);
 	}
-	CloseHandle(hSnapshot);
 	return ret;
 }

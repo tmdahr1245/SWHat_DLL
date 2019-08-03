@@ -51,7 +51,7 @@ char NTapi_list[NTAPI_NUM][50] = {
 WinAPI_struct* winapi;
 NTAPI_struct* ntapi;
 
-VOID Init() {
+VOID HookInit() {
 	winapi = (WinAPI_struct*)malloc(sizeof(WinAPI_struct));
 	if (!winapi) {
 		OutputDebugString(TEXT("WinAPI Malloc Error"));
@@ -151,26 +151,27 @@ BOOL hook_code(LPCSTR szDllName, LPCSTR szFuncName, PROC pfnNew, DWORD idx) {
 
 	return TRUE;
 }
-VOID Hook() {
+VOID HookFailLog(char* api) {
+	char msg[100];
+	strcpy(msg, api);
+	strcat(msg, " HOOK FAIL");
+	OutputDebugStringA(msg);
+}
+VOID HookStart() {
 	BOOL ret;
-	wchar_t msg[100];
-	Init();
+	HookInit();
 	for (int i = 0; i < WINAPI_NUM; i++) {
 		HMODULE hMod = GetModuleHandle(ConvertMultibyteToUnicode(winapi->dll_list[i]));
 		ret = hook_iat(winapi->dll_list[i], GetProcAddress(hMod, winapi->api_list[i]), (PROC)winapi->function_list[i], i);
 		if (!ret) {
-			lstrcpy(msg, ConvertMultibyteToUnicode(winapi->api_list[i]));
-			lstrcat(msg, TEXT(" HOOK FAIL(WINAPI)"));
-			OutputDebugString(msg);
+			HookFailLog(winapi->api_list[i]);
 		}
 	}
 	for (int i = 0; i < NTAPI_NUM; i++) {
 		//if (i == 9 || i == 12)continue;
 		ret = hook_code("ntdll.dll", ntapi->NTapi_list[i], (PROC)ntapi->NTfunction_list[i], i);
 		if (!ret) {
-			lstrcpy(msg, ConvertMultibyteToUnicode(ntapi->NTapi_list[i]));
-			lstrcat(msg, TEXT(" HOOK FAIL(NTAPI)"));
-			OutputDebugString(msg);
+			HookFailLog(ntapi->NTapi_list[i]);
 		}
 	}
 }
