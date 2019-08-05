@@ -14,6 +14,7 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved){
 		HookStart();
 		break;
 	case DLL_PROCESS_DETACH:
+		//닫기 전이나 후에 바로 서버로 로그전송
 		LogFileClose();
 		OutputDebugString(TEXT("finish"));
 		break;

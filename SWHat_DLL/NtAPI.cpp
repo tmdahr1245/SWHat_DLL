@@ -24,13 +24,6 @@ typedef NTSTATUS(NTAPI* PFMyNtCreateUserProcess)(PHANDLE ProcessHandle, PHANDLE 
 typedef NTSTATUS(NTAPI* PFMyNtWriteVirtualMemory)(HANDLE ProcessHandle, LPVOID BaseAddress, LPCVOID Buffer, ULONG NumberOfBytesToWrite, ULONG* NumberOfBytesWritten);
 typedef NTSTATUS(NTAPI* PFMyNtClose)(HANDLE Handle);
 
-template<typename T>
-void push_back_format(vector<pair<string, string>>& v, const char* buf, T value, const char* name) {
-	char tt[1000];
-	sprintf(tt, buf, value);
-	v.push_back({ name, tt });
-}
-
 BOOL ExceptNtCreateFile(LPWSTR fileName) {
 #define EXACTNUM 2
 #define PARTIALNUM 5
@@ -153,22 +146,24 @@ NTSTATUS NTAPI MyNtCreateFile(
 
 		OutputDebugString(buf);
 		///////////////////////////////////////////////
+		if (*FileHandle) {
+			vector<pair<string, string>> v;
+			v.push_back({ "api", "NtCreateFile" });
+			if (is_full) {
+				v.push_back({ "FileName", string(ConvertUnicodeToMultibyte(str->Buffer)) });
+			}
+			else {
+				GetCurrentDirectoryA(MAX_PATH, current_directory);
+				v.push_back({ "FileName", string(current_directory) + " " + string(ConvertUnicodeToMultibyte(str->Buffer)) });
+			}
+			push_back_format(v, "0x%x", ret, "ret");
+			push_back_format(v, "0x%x", *FileHandle, "FileHandle");
+			push_back_format(v, "0x%x", DesiredAccess, "AcessMask");
 
-		vector<pair<string, string>> v;
-		v.push_back({ "api", "NtCreateFile" });
-		if (is_full) {
-			v.push_back({ "FileName", string(ConvertUnicodeToMultibyte(str->Buffer)) });
+			InsertHandle(*FileHandle);
+
+			Log(v);
 		}
-		else {
-			GetCurrentDirectoryA(MAX_PATH, current_directory);
-			v.push_back({ "FileName", string(current_directory) + " " + string(ConvertUnicodeToMultibyte(str->Buffer)) });
-		}
-		push_back_format(v, "0x%x", ret, "ret");
-		push_back_format(v, "0x%x", *FileHandle, "FileHandle");
-		push_back_format(v, "0x%x", DesiredAccess, "AcessMask");
-
-		Log(v);
-
 	}
 	return ret;
 }
@@ -261,14 +256,17 @@ NTSTATUS NTAPI MyNtCreateKey(
 	_stprintf(buf, L"MyNtCreateKey, FileHandle : %x, Obj : %s", *KeyHandle, ObjectAttributes->ObjectName->Buffer);
 	OutputDebugStringW(buf);
 	///////////////////////////////////////////////
+	if (*KeyHandle) {
+		vector<pair<string, string>> v;
+		v.push_back({ "api", "NtCreateKey" });
+		push_back_format(v, "0x%x", *KeyHandle, "KeyHandle");
+		v.push_back({ "Name", string(ConvertUnicodeToMultibyte(ObjectAttributes->ObjectName->Buffer)) });
+		push_back_format(v, "0x%x", ret, "ret");
 
-	vector<pair<string, string>> v;
-	v.push_back({ "api", "NtCreateKey" });
-	push_back_format(v, "0x%x", *KeyHandle, "KeyHandle");
-	v.push_back({ "Name", string(ConvertUnicodeToMultibyte(ObjectAttributes->ObjectName->Buffer)) });
-	push_back_format(v, "0x%x", ret, "ret");
+		InsertHandle(*KeyHandle);
 
-	Log(v);
+		Log(v);
+	}
 	return ret;
 }
 NTSTATUS NTAPI MyNtOpenKey(
@@ -283,14 +281,16 @@ NTSTATUS NTAPI MyNtOpenKey(
 	_stprintf(buf, L"MyNtOpenKey, FileHandle : %x, Name(?) : %s", *KeyHandle, ObjectAttributes->ObjectName->Buffer);
 	OutputDebugStringW(buf);
 	///////////////////////////////////////////////
+	if (*KeyHandle) {
+		vector<pair<string, string>> v;
+		v.push_back({ "api", "NtOpenKey" });
+		push_back_format(v, "0x%x", *KeyHandle, "KeyHandle");
+		v.push_back({ "Name", string(ConvertUnicodeToMultibyte(ObjectAttributes->ObjectName->Buffer)) });
+		push_back_format(v, "0x%x", ret, "ret");
 
-	vector<pair<string, string>> v;
-	v.push_back({ "api", "NtOpenKey" });
-	push_back_format(v, "0x%x", *KeyHandle, "KeyHandle");
-	v.push_back({ "Name", string(ConvertUnicodeToMultibyte(ObjectAttributes->ObjectName->Buffer)) });
-	push_back_format(v, "0x%x", ret, "ret");
-
-	Log(v);
+		InsertHandle(*KeyHandle);
+		Log(v);
+	}
 	return ret;
 }
 NTSTATUS NTAPI MyNtSetValueKey(
@@ -320,6 +320,7 @@ NTSTATUS NTAPI MyNtSetValueKey(
 
 	return ret;
 }
+BOOL isInjection;
 BOOL InjectDll(LPCTSTR szDllPath, DWORD dwPID) {
 	HANDLE hProcess = NULL, hThread = NULL;
 	HMODULE hModule = NULL;
@@ -330,9 +331,11 @@ BOOL InjectDll(LPCTSTR szDllPath, DWORD dwPID) {
 		return FALSE;
 	}
 	pRemoteBuf = VirtualAllocEx(hProcess, NULL, dwBufSize, MEM_COMMIT, PAGE_READWRITE);
+	isInjection = TRUE;
 	WriteProcessMemory(hProcess, pRemoteBuf, (LPVOID)szDllPath, dwBufSize, NULL);
 	hModule = GetModuleHandle(TEXT("kernel32.dll"));
 	pThreadproc = (LPTHREAD_START_ROUTINE)GetProcAddress(hModule, "LoadLibraryW");
+	isInjection = TRUE;
 	hThread = CreateRemoteThread(hProcess, NULL, 0, pThreadproc, pRemoteBuf, 0, NULL);
 	WaitForSingleObject(hThread, INFINITE);
 	CloseHandle(hThread);
@@ -364,15 +367,18 @@ NTSTATUS NTAPI MyNtCreateUserProcess(
 	InjectDll(TEXT("C:\\Users\\tmdahr1245\\source\\repos\\SWHat_DLL\\Release\\SWHat_DLL.dll"), GetProcessId(*ProcessHandle));
 	if (!ThreadFlags)ResumeThread(ThreadHandle);
 
-	vector<pair<string, string>> v;
-	v.push_back({ "api", "NtCreateUserProcess" });
-	push_back_format(v, "0x%x", *ProcessHandle, "ProcessHandle");
-	push_back_format(v, "%d", GetProcessId(*ProcessHandle), "pid");
-	v.push_back({ "ImagePathName", string(ConvertUnicodeToMultibyte(ProcessParameters->ImagePathName.Buffer)) });
-	v.push_back({ "cmdline", string(ConvertUnicodeToMultibyte(ProcessParameters->CommandLine.Buffer)) });
-	push_back_format(v, "0x%x", ret, "ret");
+	if (*ProcessHandle) {
+		vector<pair<string, string>> v;
+		v.push_back({ "api", "NtCreateUserProcess" });
+		push_back_format(v, "0x%x", *ProcessHandle, "ProcessHandle");
+		push_back_format(v, "%d", GetProcessId(*ProcessHandle), "pid");
+		v.push_back({ "ImagePathName", string(ConvertUnicodeToMultibyte(ProcessParameters->ImagePathName.Buffer)) });
+		v.push_back({ "cmdline", string(ConvertUnicodeToMultibyte(ProcessParameters->CommandLine.Buffer)) });
+		push_back_format(v, "0x%x", ret, "ret");
 
-	Log(v);
+		InsertHandle(*ProcessHandle);
+		Log(v);
+	}
 
 	return ret;
 }
@@ -392,15 +398,18 @@ NTSTATUS NTAPI MyNtWriteVirtualMemory(//createuserprocess안 injectdll에서 호출되
 	OutputDebugString(buf);
 	///////////////////////////////////////////////
 
-	vector<pair<string, string>> v;
-	v.push_back({ "api", "NtWriteVirtualMemory" });
-	push_back_format(v, "0x%x", ProcessHandle, "ProcessHandle");
-	push_back_format(v, "%d", GetProcessId(ProcessHandle), "pid");
-	push_back_format(v, "0x%x", BaseAddress, "BaseAddress");
-	push_back_format(v, "0x%x", ret, "ret");
-	push_back_format(v, "0x%x", NumberOfBytesToWrite, "NumberOfBytesToWrite");
+	if (!isInjection) {
+		vector<pair<string, string>> v;
+		v.push_back({ "api", "NtWriteVirtualMemory" });
+		push_back_format(v, "0x%x", ProcessHandle, "ProcessHandle");
+		push_back_format(v, "%d", GetProcessId(ProcessHandle), "pid");
+		push_back_format(v, "0x%x", BaseAddress, "BaseAddress");
+		push_back_format(v, "0x%x", ret, "ret");
+		push_back_format(v, "0x%x", NumberOfBytesToWrite, "NumberOfBytesToWrite");
 
-	Log(v, (wchar_t*)Buffer, NumberOfBytesToWrite, "Buffer");
+		Log(v, (wchar_t*)Buffer, NumberOfBytesToWrite, "Buffer");
+		isInjection = FALSE;
+	}
 	return ret;
 }
 
@@ -415,12 +424,14 @@ NTSTATUS NTAPI MyNtClose(
 
 	NTSTATUS ret = ((PFMyNtClose)OrgNTAPI[9])(Handle);
 
-	vector<pair<string, string>> v;
-	v.push_back({ "api", "NtClose" });
-	push_back_format(v, "0x%x", Handle, "Handle");
-	push_back_format(v, "0x%x", ret, "ret");
+	if (SearchRemoveHandle(Handle)) {
+		vector<pair<string, string>> v;
+		v.push_back({ "api", "NtClose" });
+		push_back_format(v, "0x%x", Handle, "Handle");
+		push_back_format(v, "0x%x", ret, "ret");
 
-	Log(v);
+		Log(v);
+	}
 	return ret;
 }
 LPVOID MyNtFunc[NTAPI_NUM] = { 

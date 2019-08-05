@@ -23,12 +23,6 @@ typedef int (WSAAPI* PFMyWSASend)(SOCKET s, LPWSABUF lpBuffers, DWORD dwBufferCo
 typedef int (WSAAPI* PFMyWSASendTo)(SOCKET s, LPWSABUF lpBuffers, DWORD dwBufferCount, LPDWORD lpNumberOfBytesSent, DWORD dwFlags, const struct sockaddr* lpTo, int iToLen, LPWSAOVERLAPPED lpOverlapped, LPWSAOVERLAPPED_COMPLETION_ROUTINE lpCompletionRoutine);
 typedef BOOL(WINAPI* PFMyCloseHandle)(HANDLE hObject);
 
-template<typename T>
-void push_back_format(vector<pair<string, string>>& v, const char* buf, T value, const char* name) {
-	char tt[1000];
-	sprintf(tt, buf, value);
-	v.push_back({ name, tt });
-}
 int WSAAPI Myconnect(
 	SOCKET s, 
 	const sockaddr* name,
@@ -58,6 +52,7 @@ int WSAAPI Myconnect(
 	else
 		v.push_back({ "Status", "Success" });
 
+	InsertHandle((HANDLE)s);
 	Log(v);
 
 	return ret;
@@ -179,6 +174,7 @@ SOCKET WSAAPI Myaccept(
 	v.push_back({ "ip", inet_ntoa(sock->sin_addr) });
 	push_back_format(v, "0x%x", ret, "ret");
 
+	InsertHandle((HANDLE)s);
 	Log(v);
 	return ret;
 }
@@ -196,6 +192,9 @@ int PASCAL MyconnectEx(
 	OutputDebugString(TEXT("connectEx"));
 	///////////////////////////////////////////////
 	ret = ((PFMyconnectEx)OrgWinAPI[6])(s, name, namelen, lpSendBuffer, dwSendDataLength, lpdwBytesSent, lpOverlapped);
+
+	InsertHandle((HANDLE)s);
+
 	return ret;
 }
 BOOL PASCAL MyTransmitFile(
@@ -290,12 +289,15 @@ BOOL WINAPI MyCloseHandle(HANDLE hObject) {
 	OutputDebugString(buf);
 	///////////////////////////////////////////////
 	ret = ((PFMyCloseHandle)OrgWinAPI[12])(hObject);
-	vector<pair<string, string>> v;
-	v.push_back({ "api", "CloseHandle" });
-	push_back_format(v, "0x%x", hObject, "HANDLE");
-	push_back_format(v, "0x%x", ret, "ret");
 
-	Log(v);
+	if (SearchRemoveHandle(hObject)) {
+		vector<pair<string, string>> v;
+		v.push_back({ "api", "CloseHandle" });
+		push_back_format(v, "0x%x", hObject, "HANDLE");
+		push_back_format(v, "0x%x", ret, "ret");
+
+		Log(v);
+	}
 	return ret;
 }
 LPVOID MyFunc[WINAPI_NUM] = {
