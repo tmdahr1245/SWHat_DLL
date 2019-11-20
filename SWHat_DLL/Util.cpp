@@ -2,6 +2,7 @@
 #include <stdio.h>
 HANDLE hEvent, hThread;
 DWORD dwThreadID;
+
 void WaitThreadStart() {
 	hEvent = OpenEvent(EVENT_ALL_ACCESS, TRUE, TEXT("finish"));
 	hThread = (HANDLE)_beginthreadex(NULL, 0, WaitForExit, NULL, 0, (unsigned*)& dwThreadID);

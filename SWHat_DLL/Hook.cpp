@@ -2,6 +2,9 @@
 #include "WinAPI.hpp"
 #include "NtAPI.hpp"
 #include "Util.hpp"
+#include <stdio.h>
+#include <Windows.h>
+#include <tchar.h>
 #pragma warning(disable: 4996)
 
 #define PE_SIGNATURE 0x3C
@@ -27,23 +30,66 @@ char Winapi_list[WINAPI_NUM][2][50] = {
 	{"Ws2_32.dll","recv"},
 	{"Ws2_32.dll","recvfrom"},
 	{"Ws2_32.dll","accept"},
-	{"Ws2_32.dll","connectEx"},
-	{"Ws2_32.dll","TransmitFile"},
 	{"Ws2_32.dll","WSARecv"},
 	{"Ws2_32.dll","WSARecvFrom"},
 	{"Ws2_32.dll","WSASend"},
 	{"Ws2_32.dll","WSASendTo"},
-	{"kernel32.dll","CloseHandle"}
+	{"Ws2_32.dll","closesocket"},
+	{"Ws2_32.dll","WSAConnect"},
+	{"Advapi32.dll","OpenServiceA"},
+	{"Advapi32.dll","OpenServiceW"},
+	{"Advapi32.dll","CreateServiceA"},
+	{"Advapi32.dll","CreateServiceW"},
+	{"Advapi32.dll","StartServiceA"},
+	{"Advapi32.dll","StartServiceW"},
+	{"Advapi32.dll","ControlService"},
+	{"Advapi32.dll","DeleteService"},
+	{"Urlmon.dll","URLDownloadToFileA"},
+	{"Urlmon.dll","URLDownloadToFileW"},
+	{"Wininet.dll","InternetReadFile"},
+	{"Wininet.dll","InternetWriteFile"},
+	{"Wininet.dll","InternetOpenA"},
+	{"Wininet.dll","InternetOpenW"},
+	{"Wininet.dll","InternetConnectA"},
+	{"Wininet.dll","InternetConnectW"},
+	{"Wininet.dll","InternetOpenUrlA"},
+	{"Wininet.dll","InternetOpenUrlW"},
+	{"Wininet.dll","HttpOpenRequestA"},
+	{"Wininet.dll","HttpOpenRequestW"},
+	{"Wininet.dll","HttpSendRequestA"},
+	{"Wininet.dll","HttpSendRequestW"},
+	{"Ws2_32.dll","WSAIoctl"},
+	{"Advapi32.dll","RegCreateKeyA"},
+	{"Advapi32.dll","RegCreateKeyW"},
+	{"Advapi32.dll","RegCreateKeyExA"},
+	{"Advapi32.dll","RegCreateKeyExW"},
+	{"Advapi32.dll","RegOpenKeyA"},
+	{"Advapi32.dll","RegOpenKeyW"},
+	{"Advapi32.dll","RegOpenKeyExA"},
+	{"Advapi32.dll","RegOpenKeyExW"},
+	{"Advapi32.dll","RegSetValueA"},
+	{"Advapi32.dll","RegSetValueW"},
+	{"Advapi32.dll","RegSetValueExA"},
+	{"Advapi32.dll","RegSetValueExW"},
+	{"Advapi32.dll","RegSetKeyValueA"},
+	{"Advapi32.dll","RegSetKeyValueW"},
+	{"Advapi32.dll","RegDeleteKeyA"},
+	{"Advapi32.dll","RegDeleteKeyW"},
+	{"Advapi32.dll","RegDeleteKeyExA"},
+	{"Advapi32.dll","RegDeleteKeyExW"},
+	{"Advapi32.dll","RegDeleteValueA"},
+	{"Advapi32.dll","RegDeleteValueW"},
+	{"Advapi32.dll","RegDeleteKeyValueA"},
+	{"Advapi32.dll","RegDeleteKeyValueW"},
+	{"Advapi32.dll","RegCloseKey"},
+	{"Advapi32.dll", "CloseServiceHandle"}
+
+
 };
 
 char NTapi_list[NTAPI_NUM][50] = {
 	"NtCreateFile",
 	"NtWriteFile",
-	"NtDeleteKey",
-	"NtDeleteValueKey",
-	"NtCreateKey",
-	"NtOpenKey",
-	"NtSetValueKey",
 	"NtCreateUserProcess",
 	"NtWriteVirtualMemory",
 	"NtClose"
@@ -69,6 +115,25 @@ VOID HookInit() {
 		strcpy(ntapi->NTapi_list[i], NTapi_list[i]);
 		ntapi->NTfunction_list[i] = MyNtFunc[i];
 	}
+
+	GUID guid = WSAID_CONNECTEX;
+	DWORD dwBytes;
+	WSADATA wsaData;
+	WSAStartup(MAKEWORD(2, 2), &wsaData);
+	SOCKET sock = socket(AF_INET, SOCK_STREAM, 0);
+	if (sock == INVALID_SOCKET) {
+		wchar_t buf[100];
+		_stprintf(buf, L"error : %x", GetLastError());
+		OutputDebugString(buf);
+		return;
+	}
+	int rc = WSAIoctl(sock, SIO_GET_EXTENSION_FUNCTION_POINTER,
+		&guid, sizeof(guid),
+		&Org_Connectex, sizeof(Org_Connectex),
+		&dwBytes, NULL, NULL);
+	wchar_t buf[100];
+	_stprintf(buf, L"%x", Org_Connectex);
+	OutputDebugString(buf);
 }
 
 BOOL hook_iat(LPCSTR szDllName, PROC pfnOrg, PROC pfnNew, DWORD idx) {
@@ -113,7 +178,7 @@ BOOL hook_code(LPCSTR szDllName, LPCSTR szFuncName, PROC pfnNew, DWORD idx) {
 	BYTE pBuf[5] = { JMP_OPCODE, 0, };
 	PBYTE pByte;
 	BYTE calc_byte[10] = { 0, };
-
+	
 	pFunc = (FARPROC)GetProcAddress(GetModuleHandleA(szDllName), szFuncName);
 
 	if (!pFunc) {
@@ -140,8 +205,10 @@ BOOL hook_code(LPCSTR szDllName, LPCSTR szFuncName, PROC pfnNew, DWORD idx) {
 	VirtualProtect((LPVOID)hook_byte, 10, PAGE_EXECUTE_READWRITE, &dwOldProtect);
 	memcpy(hook_byte, calc_byte, 10);
 	VirtualProtect((LPVOID)hook_byte, 10, dwOldProtect, &dwOldProtect);
-
-	OrgNTAPI[idx] = hook_byte;
+	if (!strcmp(szDllName, "ntdll.dll"))
+		OrgNTAPI[idx] = hook_byte;
+	else
+		OrgWinAPI[idx] = hook_byte;
 
 	VirtualProtect((LPVOID)pFunc, 5, PAGE_EXECUTE_READWRITE, &dwOldProtect);
 	dwAddress = (DWORD)pfnNew - (DWORD)pFunc - 5;
@@ -161,14 +228,13 @@ VOID HookStart() {
 	BOOL ret;
 	HookInit();
 	for (int i = 0; i < WINAPI_NUM; i++) {
-		HMODULE hMod = GetModuleHandle(ConvertMultibyteToUnicode(winapi->dll_list[i]));
-		ret = hook_iat(winapi->dll_list[i], GetProcAddress(hMod, winapi->api_list[i]), (PROC)winapi->function_list[i], i);
+		ret = hook_code(winapi->dll_list[i], winapi->api_list[i], (PROC)winapi->function_list[i], i);
 		if (!ret) {
 			HookFailLog(winapi->api_list[i]);
 		}
 	}
+
 	for (int i = 0; i < NTAPI_NUM; i++) {
-		//if (i == 9 || i == 12)continue;
 		ret = hook_code("ntdll.dll", ntapi->NTapi_list[i], (PROC)ntapi->NTfunction_list[i], i);
 		if (!ret) {
 			HookFailLog(ntapi->NTapi_list[i]);

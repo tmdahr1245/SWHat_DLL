@@ -5,7 +5,7 @@
 
 using namespace std;
 
-extern wchar_t log_name[11];
+extern wchar_t log_name[15];
 extern HANDLE hLogFile;
 extern list<HANDLE> hList;
 

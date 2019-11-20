@@ -12,7 +12,7 @@ using namespace rapidjson;
 
 FILE* fp;
 HANDLE hMutex, hLogFile;
-wchar_t log_name[11];
+wchar_t log_name[15];
 BOOL startLogging = FALSE;
 list<HANDLE> hList;
 
@@ -49,7 +49,9 @@ void LogFileOpen() {
 	wchar_t buf[10];
 	DWORD dwByte;
 
-	lstrcpy(log_name, L"C:\\");
+	wchar_t env[100];
+	lstrcpy(env, _wgetenv(L"appdata"));
+	lstrcat(env, L"\\..\\Local\\");
 	lstrcat(log_name, _ultow(pid, buf, 10));
 	lstrcat(log_name, L".json");
 

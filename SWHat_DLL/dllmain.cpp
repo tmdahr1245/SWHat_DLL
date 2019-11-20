@@ -1,4 +1,5 @@
-﻿#include "Hook.hpp"
+﻿
+#include "Hook.hpp"
 #include "Log.hpp"
 #include "Util.hpp"
 //유니코드
@@ -7,7 +8,7 @@
 //증분링크 사용안함
 #pragma warning(disable: 4996)
 BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved){
-	switch (fdwReason)	{
+	switch (fdwReason) {
 	case DLL_PROCESS_ATTACH:
 		LogFileOpen();
 		WaitThreadStart();

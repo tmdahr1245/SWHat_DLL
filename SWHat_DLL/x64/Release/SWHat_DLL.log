@@ -1,0 +1,70 @@
+﻿  dllmain.cpp
+  NtAPI.cpp
+C:\Users\tmdahr1245\source\repos\SWHat_DLL\SWHat_DLL\NtAPI.cpp(189,15): warning C4477:  'sprintf' : 서식 문자열 '%x'에 'unsigned int' 형식의 인수가 필요하지만 variadic 인수 1의 형식이 'HANDLE'입니다.
+C:\Users\tmdahr1245\source\repos\SWHat_DLL\SWHat_DLL\NtAPI.cpp(189,15): warning C4313:  'sprintf': 서식 문자열의 '%x'이(가) 인수 1('HANDLE' 형식)과(와) 충돌합니다.
+C:\Users\tmdahr1245\source\repos\SWHat_DLL\SWHat_DLL\NtAPI.cpp(212,17): warning C4477:  '_swprintf' : 서식 문자열 '%x'에 'unsigned int' 형식의 인수가 필요하지만 variadic 인수 1의 형식이 'HANDLE'입니다.
+C:\Users\tmdahr1245\source\repos\SWHat_DLL\SWHat_DLL\NtAPI.cpp(212,17): warning C4313:  '_swprintf': 서식 문자열의 '%x'이(가) 인수 1('HANDLE' 형식)과(와) 충돌합니다.
+C:\Users\tmdahr1245\source\repos\SWHat_DLL\SWHat_DLL\NtAPI.cpp(231,17): warning C4477:  '_swprintf' : 서식 문자열 '%x'에 'unsigned int' 형식의 인수가 필요하지만 variadic 인수 1의 형식이 'HANDLE'입니다.
+C:\Users\tmdahr1245\source\repos\SWHat_DLL\SWHat_DLL\NtAPI.cpp(231,17): warning C4313:  '_swprintf': 서식 문자열의 '%x'이(가) 인수 1('HANDLE' 형식)과(와) 충돌합니다.
+C:\Users\tmdahr1245\source\repos\SWHat_DLL\SWHat_DLL\NtAPI.cpp(257,17): warning C4477:  '_swprintf' : 서식 문자열 '%x'에 'unsigned int' 형식의 인수가 필요하지만 variadic 인수 1의 형식이 'HANDLE'입니다.
+C:\Users\tmdahr1245\source\repos\SWHat_DLL\SWHat_DLL\NtAPI.cpp(257,17): warning C4313:  '_swprintf': 서식 문자열의 '%x'이(가) 인수 1('HANDLE' 형식)과(와) 충돌합니다.
+C:\Users\tmdahr1245\source\repos\SWHat_DLL\SWHat_DLL\NtAPI.cpp(282,17): warning C4477:  '_swprintf' : 서식 문자열 '%x'에 'unsigned int' 형식의 인수가 필요하지만 variadic 인수 1의 형식이 'HANDLE'입니다.
+C:\Users\tmdahr1245\source\repos\SWHat_DLL\SWHat_DLL\NtAPI.cpp(282,17): warning C4313:  '_swprintf': 서식 문자열의 '%x'이(가) 인수 1('HANDLE' 형식)과(와) 충돌합니다.
+C:\Users\tmdahr1245\source\repos\SWHat_DLL\SWHat_DLL\NtAPI.cpp(309,17): warning C4477:  '_swprintf' : 서식 문자열 '%x'에 'unsigned int' 형식의 인수가 필요하지만 variadic 인수 1의 형식이 'HANDLE'입니다.
+C:\Users\tmdahr1245\source\repos\SWHat_DLL\SWHat_DLL\NtAPI.cpp(309,17): warning C4313:  '_swprintf': 서식 문자열의 '%x'이(가) 인수 1('HANDLE' 형식)과(와) 충돌합니다.
+C:\Users\tmdahr1245\source\repos\SWHat_DLL\SWHat_DLL\NtAPI.cpp(423,17): warning C4477:  '_swprintf' : 서식 문자열 '%x'에 'unsigned int' 형식의 인수가 필요하지만 variadic 인수 1의 형식이 'HANDLE'입니다.
+C:\Users\tmdahr1245\source\repos\SWHat_DLL\SWHat_DLL\NtAPI.cpp(423,17): warning C4313:  '_swprintf': 서식 문자열의 '%x'이(가) 인수 1('HANDLE' 형식)과(와) 충돌합니다.
+C:\Users\tmdahr1245\source\repos\SWHat_DLL\SWHat_DLL\NtAPI.cpp(448,17): warning C4477:  '_swprintf' : 서식 문자열 '%x'에 'unsigned int' 형식의 인수가 필요하지만 variadic 인수 1의 형식이 'HANDLE'입니다.
+  Log.cpp
+C:\Users\tmdahr1245\source\repos\SWHat_DLL\SWHat_DLL\NtAPI.cpp(448,17): warning C4313:  '_swprintf': 서식 문자열의 '%x'이(가) 인수 1('HANDLE' 형식)과(와) 충돌합니다.
+C:\Users\tmdahr1245\source\repos\SWHat_DLL\SWHat_DLL\Log.cpp(50,8): warning C4101:  'dwByte' :참조되지 않은 지역 변수입니다.
+C:\Users\tmdahr1245\source\repos\SWHat_DLL\SWHat_DLL\Log.cpp(78,73): warning C4267:  '인수': 'size_t'에서 'DWORD'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+  Hook.cpp
+C:\Users\tmdahr1245\source\repos\SWHat_DLL\SWHat_DLL\Log.cpp(111,74): warning C4267:  '인수': 'size_t'에서 'DWORD'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\tmdahr1245\source\repos\SWHat_DLL\SWHat_DLL\Hook.cpp(116,17): warning C4477:  '_swprintf' : 서식 문자열 '%x'에 'unsigned int' 형식의 인수가 필요하지만 variadic 인수 1의 형식이 'LPFN_CONNECTEX'입니다.
+C:\Users\tmdahr1245\source\repos\SWHat_DLL\SWHat_DLL\Hook.cpp(116,17): warning C4313:  '_swprintf': 서식 문자열의 '%x'이(가) 인수 1('LPFN_CONNECTEX' 형식)과(와) 충돌합니다.
+C:\Users\tmdahr1245\source\repos\SWHat_DLL\SWHat_DLL\Hook.cpp(136,55): warning C4311:  '형식 캐스트': 'HMODULE'에서 'DWORD'(으)로 포인터가 잘립니다.
+C:\Users\tmdahr1245\source\repos\SWHat_DLL\SWHat_DLL\Hook.cpp(136,55): warning C4302:  '형식 캐스트': 'HMODULE'에서 'DWORD'(으)로 잘립니다.
+C:\Users\tmdahr1245\source\repos\SWHat_DLL\SWHat_DLL\Hook.cpp(136,63): warning C4312:  '형식 캐스트': 'unsigned long'에서 더 큰 'PIMAGE_IMPORT_DESCRIPTOR'(으)로의 변환입니다.
+C:\Users\tmdahr1245\source\repos\SWHat_DLL\SWHat_DLL\Hook.cpp(140,36): warning C4311:  '형식 캐스트': 'HMODULE'에서 'DWORD'(으)로 포인터가 잘립니다.
+C:\Users\tmdahr1245\source\repos\SWHat_DLL\SWHat_DLL\Hook.cpp(140,36): warning C4302:  '형식 캐스트': 'HMODULE'에서 'DWORD'(으)로 잘립니다.
+C:\Users\tmdahr1245\source\repos\SWHat_DLL\SWHat_DLL\Hook.cpp(140,56): warning C4312:  '형식 캐스트': 'unsigned long'에서 더 큰 'LPCSTR'(으)로의 변환입니다.
+C:\Users\tmdahr1245\source\repos\SWHat_DLL\SWHat_DLL\Hook.cpp(142,45): warning C4311:  '형식 캐스트': 'HMODULE'에서 'DWORD'(으)로 포인터가 잘립니다.
+C:\Users\tmdahr1245\source\repos\SWHat_DLL\SWHat_DLL\Hook.cpp(142,45): warning C4302:  '형식 캐스트': 'HMODULE'에서 'DWORD'(으)로 잘립니다.
+C:\Users\tmdahr1245\source\repos\SWHat_DLL\SWHat_DLL\Hook.cpp(142,71): warning C4312:  '형식 캐스트': 'unsigned long'에서 더 큰 'PIMAGE_THUNK_DATA'(으)로의 변환입니다.
+C:\Users\tmdahr1245\source\repos\SWHat_DLL\SWHat_DLL\Hook.cpp(145,45): warning C4311:  '형식 캐스트': 'PROC'에서 'DWORD'(으)로 포인터가 잘립니다.
+C:\Users\tmdahr1245\source\repos\SWHat_DLL\SWHat_DLL\Hook.cpp(145,45): warning C4302:  '형식 캐스트': 'PROC'에서 'DWORD'(으)로 잘립니다.
+C:\Users\tmdahr1245\source\repos\SWHat_DLL\SWHat_DLL\Hook.cpp(147,41): warning C4311:  '형식 캐스트': 'PROC'에서 'DWORD'(으)로 포인터가 잘립니다.
+C:\Users\tmdahr1245\source\repos\SWHat_DLL\SWHat_DLL\Hook.cpp(147,41): warning C4302:  '형식 캐스트': 'PROC'에서 'DWORD'(으)로 잘립니다.
+C:\Users\tmdahr1245\source\repos\SWHat_DLL\SWHat_DLL\Hook.cpp(183,32): warning C4311:  '형식 캐스트': 'FARPROC'에서 'DWORD'(으)로 포인터가 잘립니다.
+C:\Users\tmdahr1245\source\repos\SWHat_DLL\SWHat_DLL\Hook.cpp(183,32): warning C4302:  '형식 캐스트': 'FARPROC'에서 'DWORD'(으)로 잘립니다.
+C:\Users\tmdahr1245\source\repos\SWHat_DLL\SWHat_DLL\Hook.cpp(183,56): warning C4311:  '형식 캐스트': 'LPVOID'에서 'DWORD'(으)로 포인터가 잘립니다.
+C:\Users\tmdahr1245\source\repos\SWHat_DLL\SWHat_DLL\Hook.cpp(183,56): warning C4302:  '형식 캐스트': 'LPVOID'에서 'DWORD'(으)로 잘립니다.
+C:\Users\tmdahr1245\source\repos\SWHat_DLL\SWHat_DLL\Hook.cpp(195,28): warning C4311:  '형식 캐스트': 'PROC'에서 'DWORD'(으)로 포인터가 잘립니다.
+C:\Users\tmdahr1245\source\repos\SWHat_DLL\SWHat_DLL\Hook.cpp(195,28): warning C4302:  '형식 캐스트': 'PROC'에서 'DWORD'(으)로 잘립니다.
+C:\Users\tmdahr1245\source\repos\SWHat_DLL\SWHat_DLL\Hook.cpp(195,43): warning C4311:  '형식 캐스트': 'FARPROC'에서 'DWORD'(으)로 포인터가 잘립니다.
+  Util.cpp
+C:\Users\tmdahr1245\source\repos\SWHat_DLL\SWHat_DLL\Hook.cpp(195,43): warning C4302:  '형식 캐스트': 'FARPROC'에서 'DWORD'(으)로 잘립니다.
+  WinAPI.cpp
+C:\Users\tmdahr1245\source\repos\SWHat_DLL\SWHat_DLL\Util.cpp(21,68): warning C4267:  '인수': 'size_t'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\tmdahr1245\source\repos\SWHat_DLL\SWHat_DLL\WinAPI.cpp(62,17): warning C4477:  '_swprintf' : 서식 문자열 '%x'에 'unsigned int' 형식의 인수가 필요하지만 variadic 인수 1의 형식이 'SOCKET'입니다.
+C:\Users\tmdahr1245\source\repos\SWHat_DLL\SWHat_DLL\WinAPI.cpp(62,17): message :  서식 문자열에서 '%llx'을(를) 사용하는 것이 좋습니다.
+C:\Users\tmdahr1245\source\repos\SWHat_DLL\SWHat_DLL\WinAPI.cpp(62,17): message :  서식 문자열에서 '%Ix'을(를) 사용하는 것이 좋습니다.
+C:\Users\tmdahr1245\source\repos\SWHat_DLL\SWHat_DLL\WinAPI.cpp(62,17): message :  서식 문자열에서 '%I64x'을(를) 사용하는 것이 좋습니다.
+C:\Users\tmdahr1245\source\repos\SWHat_DLL\SWHat_DLL\WinAPI.cpp(378,17): warning C4477:  '_swprintf' : 서식 문자열 '%x'에 'unsigned int' 형식의 인수가 필요하지만 variadic 인수 1의 형식이 'SOCKET'입니다.
+C:\Users\tmdahr1245\source\repos\SWHat_DLL\SWHat_DLL\WinAPI.cpp(378,17): message :  서식 문자열에서 '%llx'을(를) 사용하는 것이 좋습니다.
+C:\Users\tmdahr1245\source\repos\SWHat_DLL\SWHat_DLL\WinAPI.cpp(378,17): message :  서식 문자열에서 '%Ix'을(를) 사용하는 것이 좋습니다.
+C:\Users\tmdahr1245\source\repos\SWHat_DLL\SWHat_DLL\WinAPI.cpp(378,17): message :  서식 문자열에서 '%I64x'을(를) 사용하는 것이 좋습니다.
+C:\Users\tmdahr1245\source\repos\SWHat_DLL\SWHat_DLL\WinAPI.cpp(798,40): warning C4267:  '=': 'size_t'에서 'DWORD'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\tmdahr1245\source\repos\SWHat_DLL\SWHat_DLL\WinAPI.cpp(937,45): warning C4311:  '형식 캐스트': 'BOOL (__cdecl *)(SOCKET,const sockaddr *,int,PVOID,DWORD,LPDWORD,LPOVERLAPPED)'에서 'DWORD'(으)로 포인터가 잘립니다.
+C:\Users\tmdahr1245\source\repos\SWHat_DLL\SWHat_DLL\WinAPI.cpp(937,45): warning C4302:  '형식 캐스트': 'BOOL (__cdecl *)(SOCKET,const sockaddr *,int,PVOID,DWORD,LPDWORD,LPOVERLAPPED)'에서 'DWORD'(으)로 잘립니다.
+C:\Users\tmdahr1245\source\repos\SWHat_DLL\SWHat_DLL\WinAPI.cpp(958,17): warning C4477:  '_swprintf' : 서식 문자열 '%x'에 'unsigned int' 형식의 인수가 필요하지만 variadic 인수 1의 형식이 'SOCKET'입니다.
+C:\Users\tmdahr1245\source\repos\SWHat_DLL\SWHat_DLL\WinAPI.cpp(958,17): message :  서식 문자열에서 '%llx'을(를) 사용하는 것이 좋습니다.
+C:\Users\tmdahr1245\source\repos\SWHat_DLL\SWHat_DLL\WinAPI.cpp(958,17): message :  서식 문자열에서 '%Ix'을(를) 사용하는 것이 좋습니다.
+C:\Users\tmdahr1245\source\repos\SWHat_DLL\SWHat_DLL\WinAPI.cpp(958,17): message :  서식 문자열에서 '%I64x'을(를) 사용하는 것이 좋습니다.
+  코드를 생성하고 있습니다.
+  Previous IPDB not found, fall back to full compilation.
+C:\Users\tmdahr1245\source\repos\SWHat_DLL\SWHat_DLL\Util.cpp(49): warning C4172: 지역 변수 또는 임시: ret의 주소를 반환하고 있습니다.
+  All 459 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
+  코드를 생성했습니다.
+  SWHat_DLL.vcxproj -> C:\Users\tmdahr1245\source\repos\SWHat_DLL\x64\Release\SWHat_DLL.dll
